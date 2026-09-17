@@ -133,8 +133,10 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     await ensureFontLoaded();
     var canvas = drawTicketCanvas(number);
     var imgData = canvas.toDataURL('image/jpeg', 0.82);
-    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: [300, 180], compress: true });
-    doc.addImage(imgData, 'JPEG', 0, 0, 300, 180);
+    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: [500, 300], orientation: 'landscape', compress: true });
+    var pageW = doc.internal.pageSize.getWidth();
+    var pageH = doc.internal.pageSize.getHeight();
+    doc.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
     return doc.output('blob');
   }
 
