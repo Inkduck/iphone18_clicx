@@ -59,3 +59,26 @@ for select using (bucket_id = 'tickets');
 drop policy if exists "Anon upload tickets" on storage.objects;
 create policy "Anon upload tickets" on storage.objects
 for insert to anon with check (bucket_id = 'tickets');
+
+-- Log of every ticket whose QR/PDF was generated: ticket number, server
+-- timestamp, and where its PDF lives in storage. View this anytime in
+-- Table Editor > ticket_log. The public site can only add rows (via
+-- log_ticket below), never read, update, or delete them directly.
+create table if not exists ticket_log (
+  id bigint generated always as identity primary key,
+  ticket_number int not null,
+  issued_at timestamptz not null default now(),
+  pdf_path text
+);
+
+create or replace function log_ticket(p_number int, p_pdf_path text)
+returns void
+language sql
+security definer
+as $$
+  insert into ticket_log (ticket_number, pdf_path) values (p_number, p_pdf_path);
+$$;
+
+alter table ticket_log enable row level security;
+revoke all on table ticket_log from anon, authenticated;
+grant execute on function log_ticket(int, text) to anon, authenticated;

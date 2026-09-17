@@ -162,6 +162,11 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
       qr.addData(ticket.pdfUrl);
       qr.make();
       ticket.qrDataUrl = qr.createDataURL(6, 8);
+      try {
+        await state.client.rpc('log_ticket', { p_number: ticket.number, p_pdf_path: path });
+      } catch (logErr) {
+        console.error('log_ticket failed:', logErr);
+      }
     } catch (e) {
       ticket.extrasError = (e && (e.message || e.error_description || e.statusText)) || JSON.stringify(e) || 'unknown error';
       console.error('ticket extras failed:', e);
