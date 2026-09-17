@@ -46,7 +46,7 @@ grant execute on function reset_counter() to anon, authenticated;
 -- Storage bucket for the per-ticket PDF, so a QR code on the ticket can
 -- link to a file anyone can download from their own phone.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('tickets', 'tickets', true, 2097152, array['application/pdf'])
+values ('tickets', 'tickets', true, 8388608, array['application/pdf'])
 on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit,
