@@ -114,7 +114,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
   }
 
   function drawTicketCanvas(number) {
-    var scale = 2, w = 500, h = 700;
+    var scale = 2, w = 500, h = 300;
     var canvas = document.createElement('canvas');
     canvas.width = w * scale; canvas.height = h * scale;
     var ctx = canvas.getContext('2d');
@@ -126,16 +126,6 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     ctx.fillText('บัตรคิวของคุณ', w / 2, 70);
     ctx.fillStyle = '#0E6E5E'; ctx.font = "700 96px 'Space Grotesk'";
     ctx.fillText(ticketLabel(number), w / 2, 190);
-    ctx.strokeStyle = '#D2DAD5'; ctx.setLineDash([6, 6]);
-    ctx.beginPath(); ctx.moveTo(40, 230); ctx.lineTo(w - 40, 230); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = '#14231F'; ctx.font = "500 22px 'IBM Plex Sans Thai'";
-    var lines = [
-      'ถ่ายภาพนี้เพื่อขอเพิ่มวงเงินใช้จ่าย',
-      'เปิดตัว iPhone 18 ที่เอไอเอสช็อป สยามสแควร์',
-      '18-22 ก.ย. 2569'
-    ];
-    lines.forEach(function (line, i) { ctx.fillText(line, w / 2, 280 + i * 34); });
     return canvas;
   }
 
@@ -143,8 +133,8 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     await ensureFontLoaded();
     var canvas = drawTicketCanvas(number);
     var imgData = canvas.toDataURL('image/jpeg', 0.82);
-    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: [300, 420], compress: true });
-    doc.addImage(imgData, 'JPEG', 0, 0, 300, 420);
+    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: [300, 180], compress: true });
+    doc.addImage(imgData, 'JPEG', 0, 0, 300, 180);
     return doc.output('blob');
   }
 
@@ -226,7 +216,6 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
         '<div class="ticket-card">' +
           '<div class="label">บัตรคิวของคุณ</div>' +
           '<div class="number num">' + ticketLabel(state.ticket.number) + '</div>' +
-          '<div class="campaign">ถ่ายภาพนี้เพื่อขอเพิ่มวงเงินใช้จ่าย<br>เปิดตัว iPhone 18 ที่เอไอเอสช็อป สยามสแควร์<br>18-22 ก.ย. 2569</div>' +
           renderQrBlock(state.ticket) +
         '</div>' +
         '<button class="ghost-btn" onclick="window.__q_reset()">เสร็จสิ้น รับคิวถัดไป</button>';
