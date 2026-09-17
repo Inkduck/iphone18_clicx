@@ -117,6 +117,13 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
   async function ensureFontLoaded() {
     try { await document.fonts.load("700 64px 'IBM Plex Sans Thai'"); } catch (e) {}
     try { await document.fonts.load("500 20px 'IBM Plex Sans Thai'"); } catch (e) {}
+    try { await document.fonts.ready; } catch (e) {}
+  }
+
+  function drawCenteredText(ctx, text, cx, y) {
+    var w = ctx.measureText(text).width;
+    ctx.textAlign = 'left';
+    ctx.fillText(text, cx - w / 2, y);
   }
 
   function drawTicketCanvas(number, issuedAt) {
@@ -127,13 +134,12 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     ctx.scale(scale, scale);
     ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = '#0E6E5E'; ctx.lineWidth = 4; ctx.strokeRect(8, 8, w - 16, h - 16);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#5B6B67'; ctx.font = "500 20px 'IBM Plex Sans Thai'";
-    ctx.fillText('บัตรคิวของคุณ', w / 2, 70);
-    ctx.fillStyle = '#0E6E5E'; ctx.font = "700 96px 'Space Grotesk'";
-    ctx.fillText(ticketLabel(number), w / 2, 190);
-    ctx.fillStyle = '#5B6B67'; ctx.font = "500 18px 'Space Grotesk'";
-    ctx.fillText(formatTimestamp(issuedAt), w / 2, 228);
+    ctx.fillStyle = '#5B6B67'; ctx.font = "500 20px 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif";
+    drawCenteredText(ctx, 'บัตรคิวของคุณ', w / 2, 70);
+    ctx.fillStyle = '#0E6E5E'; ctx.font = "700 96px 'Space Grotesk', sans-serif";
+    drawCenteredText(ctx, ticketLabel(number), w / 2, 190);
+    ctx.fillStyle = '#5B6B67'; ctx.font = "500 18px 'Space Grotesk', sans-serif";
+    drawCenteredText(ctx, formatTimestamp(issuedAt), w / 2, 228);
     return canvas;
   }
 
