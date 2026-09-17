@@ -161,7 +161,8 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
       ticket.pdfUrl = pub.data.publicUrl;
       ticket.qrDataUrl = await QRCode.toDataURL(ticket.pdfUrl, { width: 220, margin: 1 });
     } catch (e) {
-      ticket.extrasError = true;
+      ticket.extrasError = (e && (e.message || e.error_description || e.statusText)) || JSON.stringify(e) || 'unknown error';
+      console.error('ticket extras failed:', e);
     } finally {
       ticket.generatingExtras = false;
       render();
@@ -199,7 +200,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
       '</div>';
     }
     if (ticket.extrasError) {
-      return '<div class="qr-block"><div class="qr-caption">สร้าง QR/PDF ไม่สำเร็จ แต่บัตรคิวของคุณยังใช้ได้ปกติ</div></div>';
+      return '<div class="qr-block"><div class="qr-caption">สร้าง QR/PDF ไม่สำเร็จ แต่บัตรคิวของคุณยังใช้ได้ปกติ<br>(debug: ' + escapeHtml(ticket.extrasError) + ')</div></div>';
     }
     if (ticket.generatingExtras) {
       return '<div class="qr-block"><div class="qr-caption">กำลังสร้าง QR สำหรับดาวน์โหลด...</div></div>';
