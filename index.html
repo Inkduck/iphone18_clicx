@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root {
     --bg: #EEF2F0; --surface: #FFFFFF; --surface-2: #E4EAE6;
@@ -159,7 +159,10 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
       if (upload.error) throw upload.error;
       var pub = state.client.storage.from('tickets').getPublicUrl(path);
       ticket.pdfUrl = pub.data.publicUrl;
-      ticket.qrDataUrl = await QRCode.toDataURL(ticket.pdfUrl, { width: 220, margin: 1 });
+      var qr = qrcode(0, 'M');
+      qr.addData(ticket.pdfUrl);
+      qr.make();
+      ticket.qrDataUrl = qr.createDataURL(6, 8);
     } catch (e) {
       ticket.extrasError = (e && (e.message || e.error_description || e.statusText)) || JSON.stringify(e) || 'unknown error';
       console.error('ticket extras failed:', e);
