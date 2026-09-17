@@ -57,6 +57,7 @@
   }
   .ticket-card .label { font-size: 14px; color: var(--muted); }
   .ticket-card .number { font-size: 84px; font-weight: 700; line-height: 1; color: var(--primary); }
+  .ticket-card .timestamp { font-size: 14px; color: var(--muted); }
   .ticket-card .campaign { font-size: 15px; line-height: 1.5; border-top: 1px dashed var(--line); padding-top: 16px; margin-top: 4px; }
   .ghost-btn { background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 15px; padding: 12px 24px; border-radius: var(--radius); cursor: pointer; }
   .ghost-btn:hover { border-color: var(--primary); }
@@ -92,6 +93,11 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
   function pad(n) { return String(n).padStart(3, '0'); }
   function ticketLabel(n) { return 'Q' + pad(n); }
   function escapeHtml(s) { return String(s); }
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function formatTimestamp(d) {
+    return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' +
+      pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
 
   async function takeTicket() {
     if (state.busy || !state.client) return;
@@ -99,7 +105,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     try {
       var res = await state.client.rpc('take_ticket');
       if (res.error) throw res.error;
-      state.ticket = { number: res.data, generatingExtras: true };
+      state.ticket = { number: res.data, issuedAt: new Date(), generatingExtras: true };
       attachTicketExtras(state.ticket);
     } catch (e) {
       state.error = 'ออกบัตรคิวไม่สำเร็จ ลองใหม่อีกครั้ง';
@@ -113,8 +119,8 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     try { await document.fonts.load("500 20px 'IBM Plex Sans Thai'"); } catch (e) {}
   }
 
-  function drawTicketCanvas(number) {
-    var scale = 2, w = 500, h = 300;
+  function drawTicketCanvas(number, issuedAt) {
+    var scale = 2, w = 500, h = 320;
     var canvas = document.createElement('canvas');
     canvas.width = w * scale; canvas.height = h * scale;
     var ctx = canvas.getContext('2d');
@@ -126,14 +132,16 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     ctx.fillText('บัตรคิวของคุณ', w / 2, 70);
     ctx.fillStyle = '#0E6E5E'; ctx.font = "700 96px 'Space Grotesk'";
     ctx.fillText(ticketLabel(number), w / 2, 190);
+    ctx.fillStyle = '#5B6B67'; ctx.font = "500 18px 'Space Grotesk'";
+    ctx.fillText(formatTimestamp(issuedAt), w / 2, 228);
     return canvas;
   }
 
-  async function buildTicketPdfBlob(number) {
+  async function buildTicketPdfBlob(number, issuedAt) {
     await ensureFontLoaded();
-    var canvas = drawTicketCanvas(number);
+    var canvas = drawTicketCanvas(number, issuedAt);
     var imgData = canvas.toDataURL('image/jpeg', 0.82);
-    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: [500, 300], orientation: 'landscape', compress: true });
+    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: [500, 320], orientation: 'landscape', compress: true });
     var pageW = doc.internal.pageSize.getWidth();
     var pageH = doc.internal.pageSize.getHeight();
     doc.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
@@ -142,7 +150,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
 
   async function attachTicketExtras(ticket) {
     try {
-      var blob = await buildTicketPdfBlob(ticket.number);
+      var blob = await buildTicketPdfBlob(ticket.number, ticket.issuedAt);
       var path = 'Q' + pad(ticket.number) + '-' + Date.now() + '.pdf';
       var upload = await state.client.storage.from('tickets').upload(path, blob, {
         contentType: 'application/pdf', upsert: false
@@ -218,6 +226,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
         '<div class="ticket-card">' +
           '<div class="label">บัตรคิวของคุณ</div>' +
           '<div class="number num">' + ticketLabel(state.ticket.number) + '</div>' +
+          '<div class="timestamp num">' + formatTimestamp(state.ticket.issuedAt) + '</div>' +
           renderQrBlock(state.ticket) +
         '</div>' +
         '<button class="ghost-btn" onclick="window.__q_reset()">เสร็จสิ้น รับคิวถัดไป</button>';
