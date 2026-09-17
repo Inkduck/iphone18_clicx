@@ -109,9 +109,21 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     }
   }
 
+  var logoClicx = new Image(); logoClicx.src = 'logo-clicx.png';
+  var logoAis = new Image(); logoAis.src = 'logo-ais.png';
+
+  function waitForImage(img) {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise(function (resolve) {
+      img.onload = function () { resolve(); };
+      img.onerror = function () { resolve(); };
+    });
+  }
+
   async function ensureFontLoaded() {
     try { await document.fonts.load("700 64px 'IBM Plex Sans Thai'"); } catch (e) {}
     try { await document.fonts.load("500 20px 'IBM Plex Sans Thai'"); } catch (e) {}
+    await Promise.all([waitForImage(logoClicx), waitForImage(logoAis)]);
   }
 
   function drawTicketCanvas(number) {
@@ -122,13 +134,22 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     ctx.scale(scale, scale);
     ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = '#0E6E5E'; ctx.lineWidth = 4; ctx.strokeRect(8, 8, w - 16, h - 16);
+
+    if (logoClicx.naturalWidth && logoAis.naturalWidth) {
+      var clicxH = 30, clicxW = clicxH * (logoClicx.naturalWidth / logoClicx.naturalHeight);
+      var aisH = 26, aisW = aisH * (logoAis.naturalWidth / logoAis.naturalHeight);
+      var gap = 10, totalW = clicxW + gap + aisW, startX = w / 2 - totalW / 2, logoY = 22;
+      ctx.drawImage(logoClicx, startX, logoY, clicxW, clicxH);
+      ctx.drawImage(logoAis, startX + clicxW + gap, logoY + (clicxH - aisH) / 2, aisW, aisH);
+    }
+
     ctx.textAlign = 'center';
     ctx.fillStyle = '#5B6B67'; ctx.font = "500 20px 'IBM Plex Sans Thai'";
-    ctx.fillText('บัตรคิวของคุณ', w / 2, 70);
+    ctx.fillText('บัตรคิวของคุณ', w / 2, 88);
     ctx.fillStyle = '#0E6E5E'; ctx.font = "700 96px 'Space Grotesk'";
-    ctx.fillText(ticketLabel(number), w / 2, 190);
+    ctx.fillText(ticketLabel(number), w / 2, 208);
     ctx.strokeStyle = '#D2DAD5'; ctx.setLineDash([6, 6]);
-    ctx.beginPath(); ctx.moveTo(40, 230); ctx.lineTo(w - 40, 230); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(40, 248); ctx.lineTo(w - 40, 248); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = '#14231F'; ctx.font = "500 22px 'IBM Plex Sans Thai'";
     var lines = [
@@ -137,7 +158,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
       'เปิดตัว iPhone 18 ที่เอไอเอสช็อป สยามสแควร์',
       '18-22 ก.ย. 2569'
     ];
-    lines.forEach(function (line, i) { ctx.fillText(line, w / 2, 280 + i * 34); });
+    lines.forEach(function (line, i) { ctx.fillText(line, w / 2, 298 + i * 34); });
     return canvas;
   }
 
@@ -227,8 +248,8 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
       body =
         '<div class="ticket-card">' +
           '<div class="brand-row">' +
-            '<svg width="26" height="26" viewBox="0 0 100 100" aria-label="CLICX"><defs><linearGradient id="clicxGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2CB"/><stop offset="100%" stop-color="#0072CE"/></linearGradient></defs><path d="M10 25 L70 10 C78 8 84 14 80 22 L55 75 C51 83 40 82 38 73 L28 45 L10 25 Z" fill="url(#clicxGrad)"/><path d="M10 25 L45 40 L38 73 C36 78 30 78 28 73 L10 25 Z" fill="url(#clicxGrad)" opacity="0.85"/></svg>' +
-            '<svg width="92" height="28" viewBox="0 0 140 46" aria-label="AIS"><defs><linearGradient id="aisLeaf" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#B5D334"/><stop offset="100%" stop-color="#4C9A2A"/></linearGradient></defs><path d="M2 20 C20 34 40 34 56 14 C62 7 68 3 74 2 C60 18 44 30 26 30 C16 30 8 26 2 20 Z" fill="url(#aisLeaf)"/><path d="M10 26 C22 36 36 34 46 24 C40 30 30 34 22 32 C16 30 12 28 10 26 Z" fill="url(#aisLeaf)"/><text x="82" y="30" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#3C3234">AIS</text></svg>' +
+            '<img src="logo-clicx.png" alt="CLICX" style="height:26px;width:auto;">' +
+            '<img src="logo-ais.png" alt="AIS" style="height:24px;width:auto;">' +
           '</div>' +
           '<div class="label">บัตรคิวของคุณ</div>' +
           '<div class="number num">' + ticketLabel(state.ticket.number) + '</div>' +
