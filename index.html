@@ -12,7 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root {
-    --bg: #EEF2F0; --surface: #FFFFFF; --surface-2: #E4EAE6;
+    --bg: #CFF5EF; --surface: #FFFFFF; --surface-2: #E4EAE6;
     --ink: #14231F; --muted: #5B6B67; --line: #D2DAD5;
     --primary: #0E6E5E; --primary-dark: #0A5548; --primary-ink: #FFFFFF;
     --danger: #B3432B; --radius: 6px;
@@ -72,6 +72,9 @@
   .cancel-btn { background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13px; padding: 8px 16px; border-radius: var(--radius); cursor: pointer; }
   .banner { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--muted); max-width: 420px; text-align: center; }
   .banner.err { border-color: var(--danger); color: var(--danger); }
+  .brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: -4px; }
+  .brand-icon { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #00C2CB, #0072CE); flex-shrink: 0; }
+  .brand-text { font-size: 19px; font-weight: 700; color: #6FA939; letter-spacing: 0.5px; }
   .qr-block { display: flex; flex-direction: column; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 16px; margin-top: 4px; }
   .qr-block img { width: 160px; height: 160px; border-radius: 4px; background: #fff; }
   .qr-caption { font-size: 12px; color: var(--muted); text-align: center; }
@@ -225,6 +228,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     if (state.ticket) {
       body =
         '<div class="ticket-card">' +
+          '<div class="brand-row"><div class="brand-icon"></div><div class="brand-text">AIS</div></div>' +
           '<div class="label">บัตรคิวของคุณ</div>' +
           '<div class="number num">' + ticketLabel(state.ticket.number) + '</div>' +
           '<div class="campaign">ถ่ายภาพนี้เพื่อขอเพิ่มวงเงินใช้จ่าย<br>สำหรับแคมเปญ AIS x CLICX<br>เปิดตัว iPhone 18 ที่เอไอเอสช็อป สยามสแควร์<br>18-22 ก.ย. 2569</div>' +
