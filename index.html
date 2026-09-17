@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>รับบัตรคิว</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root {
+    --bg: #EEF2F0; --surface: #FFFFFF; --surface-2: #E4EAE6;
+    --ink: #14231F; --muted: #5B6B67; --line: #D2DAD5;
+    --primary: #0E6E5E; --primary-dark: #0A5548; --primary-ink: #FFFFFF;
+    --danger: #B3432B; --radius: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1613; --surface: #16201C; --surface-2: #1D2823;
+      --ink: #EAF2EE; --muted: #8FA39C; --line: #283630;
+      --primary: #35B69A; --primary-dark: #2C9C84; --primary-ink: #06211B;
+      --danger: #E38468;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1613; --surface: #16201C; --surface-2: #1D2823;
+    --ink: #EAF2EE; --muted: #8FA39C; --line: #283630;
+    --primary: #35B69A; --primary-dark: #2C9C84; --primary-ink: #06211B;
+    --danger: #E38468;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans Thai', 'Noto Sans Thai', sans-serif;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: 'Space Grotesk', 'IBM Plex Sans Thai', sans-serif; font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
+  button { font-family: inherit; }
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
+  .topbar { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .topbar .brand { font-weight: 600; font-size: 16px; }
+  .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 20px 48px; width: 100%; }
+  .center-col { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; width: 100%; max-width: 420px; }
+  .ticket-btn {
+    background: var(--primary); color: var(--primary-ink); border: none;
+    font-size: 20px; font-weight: 600; padding: 26px 56px; border-radius: var(--radius); cursor: pointer;
+  }
+  .ticket-btn:disabled { opacity: 0.55; cursor: default; }
+  .ticket-btn:hover:not(:disabled) { background: var(--primary-dark); }
+  .ticket-card {
+    background: var(--surface); border: 2px solid var(--primary); border-radius: 10px;
+    padding: 40px 32px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .ticket-card .label { font-size: 14px; color: var(--muted); }
+  .ticket-card .number { font-size: 84px; font-weight: 700; line-height: 1; color: var(--primary); }
+  .ticket-card .campaign { font-size: 15px; line-height: 1.5; border-top: 1px dashed var(--line); padding-top: 16px; margin-top: 4px; }
+  .ghost-btn { background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 15px; padding: 12px 24px; border-radius: var(--radius); cursor: pointer; }
+  .ghost-btn:hover { border-color: var(--primary); }
+  .reset-link { font-size: 13px; color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; margin-top: 6px; }
+  .reset-confirm {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin-top: 6px; font-size: 14px;
+  }
+  .reset-confirm .row { display: flex; gap: 10px; }
+  .confirm-btn { background: var(--danger); color: #fff; border: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: var(--radius); cursor: pointer; }
+  .confirm-btn:disabled { opacity: 0.6; cursor: default; }
+  .cancel-btn { background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13px; padding: 8px 16px; border-radius: var(--radius); cursor: pointer; }
+  .banner { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--muted); max-width: 420px; text-align: center; }
+  .banner.err { border-color: var(--danger); color: var(--danger); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ====== FILL THESE IN before deploying (Supabase > Project Settings > API) ======
+var SUPABASE_URL = "https://jdtbuezvhsgctpwveqqi.supabase.co";
+var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
+// ==================================================================================
+
+(function () {
+  var state = { client: null, dbError: null, busy: false, ticket: null, error: null, confirmingReset: false, resetBusy: false };
+
+  function pad(n) { return String(n).padStart(3, '0'); }
+  function ticketLabel(n) { return 'Q' + pad(n); }
+  function escapeHtml(s) { return String(s); }
+
+  async function takeTicket() {
+    if (state.busy || !state.client) return;
+    state.busy = true; state.error = null; render();
+    try {
+      var res = await state.client.rpc('take_ticket');
+      if (res.error) throw res.error;
+      state.ticket = { number: res.data };
+    } catch (e) {
+      state.error = 'ออกบัตรคิวไม่สำเร็จ ลองใหม่อีกครั้ง';
+    } finally {
+      state.busy = false; render();
+    }
+  }
+
+  async function startNewRun() {
+    if (!state.client || state.resetBusy) return;
+    state.resetBusy = true; state.error = null; render();
+    try {
+      var res = await state.client.rpc('reset_counter');
+      if (res.error) throw res.error;
+      state.ticket = null;
+    } catch (e) {
+      state.error = 'เริ่มรันคิวใหม่ไม่สำเร็จ ลองใหม่อีกครั้ง';
+    } finally {
+      state.resetBusy = false; state.confirmingReset = false; render();
+    }
+  }
+
+  window.__q_takeTicket = takeTicket;
+  window.__q_reset = function () { state.ticket = null; state.error = null; render(); };
+  window.__q_askStartNewRun = function () { state.confirmingReset = true; render(); };
+  window.__q_cancelStartNewRun = function () { state.confirmingReset = false; render(); };
+  window.__q_startNewRun = startNewRun;
+
+  function renderTopbar() { return '<div class="topbar"><span class="brand">รับบัตรคิว</span></div>'; }
+
+  function render() {
+    var app = document.getElementById('app');
+    if (state.dbError) {
+      app.innerHTML = renderTopbar() + '<div class="main"><div class="center-col"><div class="banner err">' + escapeHtml(state.dbError) + '</div></div></div>';
+      return;
+    }
+    if (!state.client) {
+      app.innerHTML = renderTopbar() + '<div class="main"><div class="center-col"><div class="banner">กำลังเชื่อมต่อ...</div></div></div>';
+      return;
+    }
+    var body;
+    if (state.ticket) {
+      body =
+        '<div class="ticket-card">' +
+          '<div class="label">บัตรคิวของคุณ</div>' +
+          '<div class="number num">' + ticketLabel(state.ticket.number) + '</div>' +
+          '<div class="campaign">ถ่ายภาพนี้เพื่อขอเพิ่มวงเงินใช้จ่าย<br>สำหรับแคมเปญ AIS x CLICX<br>เปิดตัว iPhone 18 ที่เอไอเอสช็อป สยามสแควร์<br>18-22 ก.ย. 2569</div>' +
+        '</div>' +
+        '<button class="ghost-btn" onclick="window.__q_reset()">เสร็จสิ้น รับคิวถัดไป</button>';
+    } else {
+      body =
+        '<button class="ticket-btn" ' + (state.busy ? 'disabled' : '') + ' onclick="window.__q_takeTicket()">' +
+          (state.busy ? 'กำลังออกบัตร...' : 'กดรับบัตรคิว') +
+        '</button>' +
+        (state.error ? '<div class="banner err">' + escapeHtml(state.error) + '</div>' : '') +
+        (state.confirmingReset
+          ? '<div class="reset-confirm">' +
+              '<span>เริ่มรันคิวใหม่และนับเลขคิวจาก 1 ใช่หรือไม่?</span>' +
+              '<div class="row">' +
+                '<button class="confirm-btn" ' + (state.resetBusy ? 'disabled' : '') + ' onclick="window.__q_startNewRun()">' + (state.resetBusy ? 'กำลังรีเซ็ต...' : 'ยืนยัน') + '</button>' +
+                '<button class="cancel-btn" onclick="window.__q_cancelStartNewRun()">ยกเลิก</button>' +
+              '</div>' +
+            '</div>'
+          : '<button class="reset-link" onclick="window.__q_askStartNewRun()">เริ่มรันคิวใหม่</button>');
+    }
+    app.innerHTML = renderTopbar() + '<div class="main"><div class="center-col">' + body + '</div></div>';
+  }
+
+  function boot() {
+    render();
+    if (SUPABASE_URL.indexOf('YOUR_SUPABASE') === 0 || SUPABASE_ANON_KEY.indexOf('YOUR_SUPABASE') === 0) {
+      state.dbError = 'ยังไม่ได้ตั้งค่า SUPABASE_URL / SUPABASE_ANON_KEY ในไฟล์ index.html';
+      render();
+      return;
+    }
+    try {
+      state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+      state.dbError = 'เชื่อมต่อฐานข้อมูลไม่สำเร็จ ตรวจสอบค่า Supabase URL / Key';
+    }
+    render();
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
