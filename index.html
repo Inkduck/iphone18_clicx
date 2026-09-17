@@ -72,9 +72,7 @@
   .cancel-btn { background: transparent; border: 1px solid var(--line); color: var(--ink); font-size: 13px; padding: 8px 16px; border-radius: var(--radius); cursor: pointer; }
   .banner { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; font-size: 14px; color: var(--muted); max-width: 420px; text-align: center; }
   .banner.err { border-color: var(--danger); color: var(--danger); }
-  .brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: -4px; }
-  .brand-icon { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #00C2CB, #0072CE); flex-shrink: 0; }
-  .brand-text { font-size: 19px; font-weight: 700; color: #6FA939; letter-spacing: 0.5px; }
+  .brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: -4px; }
   .qr-block { display: flex; flex-direction: column; align-items: center; gap: 8px; border-top: 1px dashed var(--line); padding-top: 16px; margin-top: 4px; }
   .qr-block img { width: 160px; height: 160px; border-radius: 4px; background: #fff; }
   .qr-caption { font-size: 12px; color: var(--muted); text-align: center; }
@@ -228,7 +226,10 @@ var SUPABASE_ANON_KEY = "sb_publishable_9ginfCTUGRWtbWWzqLqN-Q_TGKhYqhm";
     if (state.ticket) {
       body =
         '<div class="ticket-card">' +
-          '<div class="brand-row"><div class="brand-icon"></div><div class="brand-text">AIS</div></div>' +
+          '<div class="brand-row">' +
+            '<svg width="26" height="26" viewBox="0 0 100 100" aria-label="CLICX"><defs><linearGradient id="clicxGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2CB"/><stop offset="100%" stop-color="#0072CE"/></linearGradient></defs><path d="M10 25 L70 10 C78 8 84 14 80 22 L55 75 C51 83 40 82 38 73 L28 45 L10 25 Z" fill="url(#clicxGrad)"/><path d="M10 25 L45 40 L38 73 C36 78 30 78 28 73 L10 25 Z" fill="url(#clicxGrad)" opacity="0.85"/></svg>' +
+            '<svg width="92" height="28" viewBox="0 0 140 46" aria-label="AIS"><defs><linearGradient id="aisLeaf" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#B5D334"/><stop offset="100%" stop-color="#4C9A2A"/></linearGradient></defs><path d="M2 20 C20 34 40 34 56 14 C62 7 68 3 74 2 C60 18 44 30 26 30 C16 30 8 26 2 20 Z" fill="url(#aisLeaf)"/><path d="M10 26 C22 36 36 34 46 24 C40 30 30 34 22 32 C16 30 12 28 10 26 Z" fill="url(#aisLeaf)"/><text x="82" y="30" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#3C3234">AIS</text></svg>' +
+          '</div>' +
           '<div class="label">บัตรคิวของคุณ</div>' +
           '<div class="number num">' + ticketLabel(state.ticket.number) + '</div>' +
           '<div class="campaign">ถ่ายภาพนี้เพื่อขอเพิ่มวงเงินใช้จ่าย<br>สำหรับแคมเปญ AIS x CLICX<br>เปิดตัว iPhone 18 ที่เอไอเอสช็อป สยามสแควร์<br>18-22 ก.ย. 2569</div>' +
