@@ -215,3 +215,41 @@ describe('partial athlete updates', () => {
     expect(raceMetrics(data.racePlans[a.id]).target).toBe(180);
   });
 });
+
+describe('phase follows race date', () => {
+  it('typing a g/kg target does not freeze the phase', () => {
+    let data = seedData(TODAY);
+    const a = data.athletes[2];
+    data = ops.setDayPlan(data, a.id, TODAY, { phase: null, gPerKg: 7 });
+    expect(data.dayPlans[a.id][TODAY].phase).toBeNull();
+    data = ops.updateAthlete(data, a.id, { raceDate: TODAY }, TODAY);
+    const b = data.athletes[2];
+    expect(dayTarget(data, b, TODAY).phase).toBe('race');
+    expect(dayTarget(data, b, TODAY).gPerKg).toBe(7);
+  });
+
+  it('changing the race date drops manually picked phases but keeps custom targets', () => {
+    let data = seedData(TODAY);
+    const a = data.athletes[2];
+    data = ops.setDayPlan(data, a.id, TODAY, { phase: 'race', gPerKg: '' });
+    data = ops.setDayPlan(data, a.id, '2026-10-14', { phase: 'd1', gPerKg: 9 });
+    expect(dayTarget(data, a, TODAY).phase).toBe('race');
+    data = ops.updateAthlete(data, a.id, { raceDate: '2026-10-17' }, TODAY);
+    const b = data.athletes[2];
+    expect(dayTarget(data, b, TODAY).phase).toBe('taper');
+    expect(data.dayPlans[a.id][TODAY]).toBeUndefined();
+    expect(data.dayPlans[a.id]['2026-10-14']).toMatchObject({ phase: null, gPerKg: 9 });
+  });
+
+  it('clearing a target with no manual phase removes the plan; null phase survives save/load', () => {
+    let data = seedData(TODAY);
+    const a = data.athletes[0];
+    data = ops.setDayPlan(data, a.id, TODAY, { phase: null, gPerKg: 8 });
+    const s = new Map();
+    const st = { getItem: (k) => s.get(k) ?? null, setItem: (k, v) => s.set(k, v) };
+    saveData(data, st);
+    expect(loadData(st).dayPlans[a.id][TODAY].phase).toBeNull();
+    data = ops.setDayPlan(data, a.id, TODAY, { gPerKg: '' });
+    expect(data.dayPlans[a.id][TODAY]).toBeUndefined();
+  });
+});

@@ -108,7 +108,7 @@ export function normalizeData(raw) {
     if (!ids.has(aid) || !isObj(days)) continue;
     dayPlans[aid] = {};
     for (const [d, p] of Object.entries(days)) {
-      if (isValidISODate(d) && isObj(p)) dayPlans[aid][d] = { id: str(p.id) || uid(), phase: str(p.phase, 'normal'), gPerKg: num(p.gPerKg) };
+      if (isValidISODate(d) && isObj(p)) dayPlans[aid][d] = { id: str(p.id) || uid(), phase: p.phase == null || p.phase === '' ? null : str(p.phase), gPerKg: num(p.gPerKg) };
     }
   }
   const hydrationTargets = {};

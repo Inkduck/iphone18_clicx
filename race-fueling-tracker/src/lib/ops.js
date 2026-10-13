@@ -48,9 +48,18 @@ export function updateAthlete(data, id, fields, today = todayISO()) {
         },
       }
     : data.racePlans;
+  const prevAthlete = data.athletes.find((a) => a.id === id);
+  let dayPlans = data.dayPlans;
+  if (fields.raceDate !== undefined && prevAthlete && fields.raceDate !== prevAthlete.raceDate && dayPlans[id]) {
+    // Phases picked for the old race date no longer apply; custom g/kg targets are kept.
+    const days = {};
+    for (const [d, p] of Object.entries(dayPlans[id])) if (p.gPerKg !== '' && p.gPerKg != null) days[d] = { ...p, phase: null };
+    dayPlans = { ...dayPlans, [id]: days };
+  }
   return {
     ...data,
     racePlans,
+    dayPlans,
     athletes: data.athletes.map((a) => {
       if (a.id !== id) return a;
       const next = { ...a, ...fields, id, isSample: false };
@@ -92,7 +101,11 @@ export function deleteAthlete(data, id) {
 export function setDayPlan(data, athleteId, date, plan) {
   const days = { ...(data.dayPlans[athleteId] ?? {}) };
   const prev = days[date];
-  days[date] = { id: prev?.id ?? uid(), phase: plan.phase ?? prev?.phase ?? 'normal', gPerKg: plan.gPerKg ?? prev?.gPerKg ?? '' };
+  // phase null = follow the race date automatically; only an explicit phase choice is stored.
+  const phase = plan.phase !== undefined ? plan.phase : prev?.phase ?? null;
+  const gPerKg = plan.gPerKg !== undefined ? plan.gPerKg : prev?.gPerKg ?? '';
+  if (phase == null && gPerKg === '') delete days[date];
+  else days[date] = { id: prev?.id ?? uid(), phase, gPerKg };
   return { ...data, dayPlans: { ...data.dayPlans, [athleteId]: days } };
 }
 
