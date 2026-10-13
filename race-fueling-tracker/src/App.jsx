@@ -27,6 +27,12 @@ export default function App() {
   const [showData, setShowData] = useState(false);
   const [diaryDate, setDiaryDate] = useState(todayISO);
   const [joinCode, setJoinCode] = useState('');
+  const [theme, setTheme] = useState(() => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'));
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#0b1220' : '#f3f6fa');
+    try { localStorage.setItem('race-fueling-tracker-theme', theme); } catch { /* per-device convenience only */ }
+  }, [theme]);
   const today = todayISO();
   const sync = useTeamSync(data, setData);
 
@@ -84,6 +90,10 @@ export default function App() {
               <span className="sync-dot" aria-hidden />{SYNC_LABEL[sync.status.state]}
             </button>
           )}
+          <button className="btn btn-ghost theme-toggle" onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} title={theme === 'dark' ? 'Light theme' : 'Dark theme'}>
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
           <button className="btn btn-ghost" onClick={() => setShowData(true)} title="Team sync, backup, import & reset">Data</button>
         </div>
         <nav className="nav">
