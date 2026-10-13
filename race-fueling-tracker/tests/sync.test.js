@@ -158,3 +158,20 @@ describe('sync round trips', () => {
     expect(sharedPart(seedData(TODAY))).not.toHaveProperty('preferences');
   });
 });
+
+describe('auth headers', () => {
+  const capture = () => {
+    const seen = [];
+    return { seen, fetchImpl: async (url, init) => { seen.push(init.headers); return { ok: true, json: async () => [] }; } };
+  };
+  it('publishable keys go only in apikey', async () => {
+    const c = capture();
+    await createApi({ url: 'https://x.supabase.co', key: 'sb_publishable_abc', fetchImpl: c.fetchImpl }).get(generateTeamCode());
+    expect(c.seen[0]).toEqual({ apikey: 'sb_publishable_abc', 'Content-Type': 'application/json' });
+  });
+  it('legacy JWT anon keys are also sent as Bearer', async () => {
+    const c = capture();
+    await createApi({ url: 'https://x.supabase.co', key: 'eyJhbGciOi.x.y', fetchImpl: c.fetchImpl }).get(generateTeamCode());
+    expect(c.seen[0].Authorization).toBe('Bearer eyJhbGciOi.x.y');
+  });
+});

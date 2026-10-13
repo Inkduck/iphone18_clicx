@@ -90,12 +90,15 @@ export class SyncError extends Error {
 export function createApi({ url, key, fetchImpl = (...a) => globalThis.fetch(...a) }) {
   if (!url || !key) throw new SyncError('config', 'Supabase is not configured.');
   const base = url.replace(/\/+$/, '');
+  // New publishable keys (sb_publishable_…) go in `apikey` only; legacy JWT anon keys also as a Bearer token.
+  const headers = { apikey: key, 'Content-Type': 'application/json' };
+  if (key.startsWith('eyJ')) headers.Authorization = `Bearer ${key}`;
   const call = async (fn, body) => {
     let res;
     try {
       res = await fetchImpl(`${base}/rest/v1/rpc/${fn}`, {
         method: 'POST',
-        headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(body),
       });
     } catch (err) {

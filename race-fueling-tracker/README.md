@@ -42,10 +42,8 @@ The repo-root `vercel.json` builds this app into `/race/` and keeps the existing
 
 Without setup, the app works locally exactly as before. With setup, a team shares one copy of the data across all browsers and phones.
 
-1. Create a Supabase project, open **SQL Editor**, paste `supabase/schema.sql`, and click **Run**.
-2. In **Project Settings → API**, copy the **Project URL** and the **anon public** key. Add them in one of two ways:
-   - fill them into `src/lib/supabaseConfig.js`, or
-   - set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (in `.env.local` for local runs, or in the Vercel project's environment variables), then rebuild.
+1. In the Supabase project, open **SQL Editor**, paste `supabase/schema.sql`, and click **Run**.
+2. `src/lib/supabaseConfig.js` already points at the same Supabase project as the queue-ticket page. All names here start with `rft_`, so nothing clashes with the queue app's tables and functions. To use a different project, edit that file or set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, then rebuild.
 3. In the app, open **Data → Create team from this browser's data**. Share the team code or join link with the athletes. Each of them opens **Data → Join team** once.
 
 How it works:
