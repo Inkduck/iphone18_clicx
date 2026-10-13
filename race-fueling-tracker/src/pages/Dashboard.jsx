@@ -46,6 +46,7 @@ export default function Dashboard({ data, athlete, today, go, selectAthlete, set
           <div className="phase-pill">
             <span className="muted small">Phase</span>
             <strong>{phaseLabel(sel.t.phase)}</strong>
+            {sel.t.phase !== sel.t.autoPhase && <span className="muted small">set manually</span>}
           </div>
         </div>
         <p className="muted small">

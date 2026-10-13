@@ -22,7 +22,7 @@ export default function CarbLoading({ data, update, athlete, today, diaryDate, s
   const plan = data.dayPlans[athlete.id]?.[date];
 
   const setPhase = (phase) => update((d) => ops.setDayPlan(d, athlete.id, date, { phase, gPerKg: '' }));
-  const setGPerKg = (v) => update((d) => ops.setDayPlan(d, athlete.id, date, { phase: plan?.phase ?? t.phase, gPerKg: v === '' ? '' : Number(v) }));
+  const setGPerKg = (v) => update((d) => ops.setDayPlan(d, athlete.id, date, { phase: plan?.phase ?? null, gPerKg: v === '' ? '' : Number(v) }));
   const reset = () => update((d) => ops.clearDayPlan(d, athlete.id, date));
 
   const gInvalid = plan && plan.gPerKg !== '' && !isValidGPerKg(plan.gPerKg);
@@ -45,7 +45,7 @@ export default function CarbLoading({ data, update, athlete, today, diaryDate, s
           <Field label="Date">
             <input type="date" value={date} onChange={(e) => e.target.value && setDiaryDate(e.target.value)} />
           </Field>
-          <Field label="Preparation phase" hint={plan?.phase ? `Auto phase for this date: ${phaseLabel(t.autoPhase)}` : 'Auto-detected from race date'}>
+          <Field label="Preparation phase" hint={plan?.phase ? `Set manually · from race date it would be ${phaseLabel(t.autoPhase)}` : 'Follows the race date automatically'}>
             <select value={t.phase} onChange={(e) => setPhase(e.target.value)}>
               {PHASES.map((ph) => <option key={ph.key} value={ph.key}>{ph.label}</option>)}
             </select>
@@ -112,7 +112,7 @@ export default function CarbLoading({ data, update, athlete, today, diaryDate, s
                           <td className="num">
                             <input className="input-compact" type="number" inputMode="decimal" step="0.5" aria-label={`g/kg for ${label}`}
                               value={dp?.gPerKg ?? ''} placeholder={String(dt.suggested)}
-                              onChange={(e) => update((x) => ops.setDayPlan(x, athlete.id, d, { phase: dp?.phase ?? dt.autoPhase, gPerKg: e.target.value === '' ? '' : Number(e.target.value) }))} />
+                              onChange={(e) => update((x) => ops.setDayPlan(x, athlete.id, d, { phase: dp?.phase ?? null, gPerKg: e.target.value === '' ? '' : Number(e.target.value) }))} />
                           </td>
                           <td className="num">{fmt(pr.target)}</td>
                           <td className="num">{fmt(act)}</td>
