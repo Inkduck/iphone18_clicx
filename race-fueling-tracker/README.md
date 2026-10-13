@@ -33,3 +33,7 @@ Other scripts: `npm test` (unit tests for calculations and data integrity), `npm
 ## Notes
 
 Nutrition values and suggestions are general estimates and guidance, not medical advice. Use rates the athlete has practised in training.
+
+## Vercel (optional)
+
+The repo-root `vercel.json` builds this app into `/race/` and keeps the existing queue-ticket page at `/`. Your data still stays in each visitor's own browser; nothing is synced between people.

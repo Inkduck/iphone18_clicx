@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm ci --prefix race-fueling-tracker",
+  "buildCommand": "rm -rf vercel-dist && mkdir -p vercel-dist && cp index.html vercel-dist/ && npm run build --prefix race-fueling-tracker -- --base=/race/ --outDir ../vercel-dist/race --emptyOutDir",
+  "outputDirectory": "vercel-dist",
+  "redirects": [{ "source": "/race", "destination": "/race/" }]
+}
