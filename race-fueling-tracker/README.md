@@ -37,3 +37,17 @@ Nutrition values and suggestions are general estimates and guidance, not medical
 ## Vercel (optional)
 
 The repo-root `vercel.json` builds this app into `/race/` and keeps the existing queue-ticket page at `/`. Your data still stays in each visitor's own browser; nothing is synced between people.
+
+## Team sync with Supabase (optional)
+
+Without setup, the app works locally exactly as before. With setup, a team shares one copy of the data across all browsers and phones.
+
+1. In the Supabase project, open **SQL Editor**, paste `supabase/schema.sql`, and click **Run**.
+2. `src/lib/supabaseConfig.js` already points at the same Supabase project as the queue-ticket page. All names here start with `rft_`, so nothing clashes with the queue app's tables and functions. To use a different project, edit that file or set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, then rebuild.
+3. In the app, open **Data → Create team from this browser's data**. Share the team code or join link with the athletes. Each of them opens **Data → Join team** once.
+
+How it works:
+- **Local-first:** every edit is saved in the browser first, then pushed to Supabase about 1.5 s later. The app checks for teammates' changes every 20 s and whenever the tab regains focus. It keeps working offline and syncs once you're back online.
+- **Merging:** changes are merged per record, so two people logging food at the same time keep both entries. If two devices edit the very same record, the last save wins.
+- **Per device:** the selected athlete and the current page are not synced.
+- **Security:** the anon key cannot read or write the table directly; it can only call `rft_get` and `rft_save`, and both require the team code. Only a SHA-256 hash of the code is stored. Anyone who has the code can view and edit the team's data, so share it only with your team.

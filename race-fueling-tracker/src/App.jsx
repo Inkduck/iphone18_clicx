@@ -8,6 +8,9 @@ import FoodDiary from './pages/FoodDiary.jsx';
 import RaceDay from './pages/RaceDay.jsx';
 import FoodDatabase from './pages/FoodDatabase.jsx';
 import DataPanel from './pages/DataPanel.jsx';
+import { useTeamSync } from './useTeamSync.js';
+
+const SYNC_LABEL = { off: '', idle: 'Team sync', pending: 'Saving…', syncing: 'Syncing…', synced: 'Synced', offline: 'Offline', error: 'Sync issue' };
 
 const NAV = [
   { key: 'dashboard', label: 'Dashboard', icon: '◧' },
@@ -23,7 +26,20 @@ export default function App() {
   const [saveError, setSaveError] = useState('');
   const [showData, setShowData] = useState(false);
   const [diaryDate, setDiaryDate] = useState(todayISO);
+  const [joinCode, setJoinCode] = useState('');
   const today = todayISO();
+  const sync = useTeamSync(data, setData);
+
+  // Shared join link: #team=CODE opens the Data panel with the code filled in.
+  useEffect(() => {
+    const m = window.location.hash.match(/team=([A-Za-z0-9-]+)/);
+    if (!m) return;
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    if (sync.meta?.code !== m[1].toUpperCase()) {
+      setJoinCode(m[1]);
+      setShowData(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     try {
@@ -63,7 +79,12 @@ export default function App() {
               {data.athletes.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           )}
-          <button className="btn btn-ghost" onClick={() => setShowData(true)} title="Backup, import & reset">Data</button>
+          {sync.meta && (
+            <button className={`sync-pill sync-${sync.status.state}`} onClick={() => setShowData(true)} title={sync.status.message || 'Team sync status'}>
+              <span className="sync-dot" aria-hidden />{SYNC_LABEL[sync.status.state]}
+            </button>
+          )}
+          <button className="btn btn-ghost" onClick={() => setShowData(true)} title="Team sync, backup, import & reset">Data</button>
         </div>
         <nav className="nav">
           {NAV.map((n) => (
@@ -95,13 +116,14 @@ export default function App() {
           </>
         )}
         <footer className="local-note">
-          Data is stored locally in this browser only and is not synchronised to other devices.
-          Use <button className="link" onClick={() => setShowData(true)}>Data → Export</button> to back up.
+          {sync.meta
+            ? <>Data is saved in this browser and synced with your team through Supabase. Anyone with the team code can view and edit it. </>
+            : <>Data is stored locally in this browser only and is not synchronised to other devices. Set up <button className="link" onClick={() => setShowData(true)}>team sync</button> or use Data → Export to back up. </>}
           Nutrition values and suggestions are estimates and general guidance, not medical advice.
         </footer>
       </main>
 
-      {showData && <DataPanel data={data} setData={setData} onClose={() => setShowData(false)} />}
+      {showData && <DataPanel data={data} setData={setData} sync={sync} initialJoinCode={joinCode} onClose={() => { setShowData(false); setJoinCode(''); }} />}
     </div>
   );
 }

@@ -234,3 +234,18 @@ pre { font-family: inherit; margin: 8px 0; }
   .calendar td, .calendar th { padding: 7px 5px; }
   .calendar .input-compact { width: 58px; }
 }
+
+/* ---------- Team sync ---------- */
+.sync-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 0.75rem; color: var(--muted); cursor: pointer; white-space: nowrap; text-transform: none; font-weight: 500; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.sync-synced .sync-dot { background: var(--accent-2); }
+.sync-syncing .sync-dot, .sync-pending .sync-dot, .sync-idle .sync-dot { background: var(--accent); }
+.sync-offline .sync-dot { background: var(--warn); }
+.sync-error .sync-dot { background: var(--danger); }
+.sync-error { color: var(--danger); }
+.sync-box { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 10px 0; background: var(--bg-2); }
+.sync-box h3 { margin: 0 0 6px; font-size: 0.95rem; display: flex; gap: 8px; align-items: center; }
+.code-row { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.code-row code { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; letter-spacing: 0.04em; overflow-wrap: anywhere; }
+.join-form { display: flex; gap: 8px; align-items: flex-end; margin-top: 8px; }
+.join-form .field { flex: 1; }
